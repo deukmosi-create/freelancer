@@ -1,0 +1,1 @@
+web: gunicorn kenya-freelancer-backend.wsgi:application
