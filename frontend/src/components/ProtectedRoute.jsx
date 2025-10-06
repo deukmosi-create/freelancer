@@ -1,60 +1,60 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
 
 const ProtectedRoute = ({ children, requiredStep }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage.getItem('token');
         if (!token) {
-          navigate('/login')
-          return
+          navigate('/login');
+          return;
         }
 
-        // Attach token to axios
-        axios.defaults.headers.common['Authorization'] = `Token ${token}`
-        
-        const res = await axios.get('/api/check-activation/')
-        const { is_activated } = res.data
+        // ✅ api.js automatically attaches token — no need to set headers manually
+
+        // Check activation status
+        const activationRes = await api.get('/api/check-activation/'); // ✅
+        const { is_activated } = activationRes.data;
 
         // Get user profile to check completion
-        const profileRes = await axios.get('/api/profile/')
-        const user = profileRes.data
+        const profileRes = await api.get('/api/profile/'); // ✅
+        const user = profileRes.data;
 
         // Enforce step-by-step flow
         if (requiredStep === 'profile') {
           if (!user.phone_number || user.skills.length === 0) {
-            navigate('/profile-setup')
-            return
+            navigate('/profile-setup');
+            return;
           }
         }
 
         if (requiredStep === 'payment') {
           if (!user.payment_method || !user.payment_identifier) {
-            navigate('/payment')
-            return
+            navigate('/payment');
+            return;
           }
         }
 
         if (requiredStep === 'activated' && !is_activated) {
-          navigate('/activate')
-          return
+          navigate('/activate');
+          return;
         }
 
       } catch (err) {
-        console.error(err)
-        localStorage.removeItem('token')
-        navigate('/login')
+        console.error('Protected route error:', err);
+        localStorage.removeItem('token');
+        navigate('/login');
       }
-    }
+    };
 
-    checkAccess()
-  }, [navigate, requiredStep])
+    checkAccess();
+  }, [navigate, requiredStep]);
 
-  return children
-}
+  return children;
+};
 
-export default ProtectedRoute
+export default ProtectedRoute;

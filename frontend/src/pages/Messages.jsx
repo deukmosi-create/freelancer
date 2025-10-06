@@ -1,46 +1,49 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { PaperAirplaneIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
+import { PaperAirplaneIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 export default function Messages() {
-  const [messages, setMessages] = useState([])
-  const [newMessage, setNewMessage] = useState('')
-  const [user, setUser] = useState(null)
-  const navigate = useNavigate()
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const [profileRes, messagesRes] = await Promise.all([
-          axios.get('/api/profile/'),
-          axios.get('/api/messages/')
-        ])
-        setUser(profileRes.data)
-        setMessages(messagesRes.data)
+          api.get('/api/profile/'),      // ✅
+          api.get('/api/messages/')      // ✅
+        ]);
+        setUser(profileRes.data);
+        setMessages(messagesRes.data);
       } catch (err) {
-        console.error(err)
+        console.error('Messages load error:', err);
+        // Optionally redirect to login if auth fails
+        // navigate('/login');
       }
-    }
-    loadData()
-  }, [])
+    };
+    loadData();
+  }, []);
 
   const handleSend = async (e) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
+    e.preventDefault();
+    if (!newMessage.trim()) return;
     
     try {
       // For demo: send to admin (user ID 1)
-      const res = await axios.post('/api/messages/', {
+      const res = await api.post('/api/messages/', {
         receiver: 1,
         content: newMessage
-      })
-      setMessages([...messages, res.data])
-      setNewMessage('')
+      });
+      setMessages([...messages, res.data]);
+      setNewMessage('');
     } catch (err) {
-      alert('Failed to send message')
+      console.error('Send message error:', err);
+      alert('Failed to send message');
     }
-  }
+  };
 
   return (
     <div>
@@ -103,5 +106,5 @@ export default function Messages() {
         </form>
       </div>
     </div>
-  )
+  );
 }

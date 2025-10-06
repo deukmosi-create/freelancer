@@ -1,47 +1,47 @@
 // src/pages/Dashboard.jsx
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
 import { 
   BriefcaseIcon, 
   ChatBubbleLeftRightIcon, 
   CurrencyDollarIcon, 
   CheckCircleIcon
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null)
-  const [stats, setStats] = useState({ tasks: 0, messages: 0, payments: 0 })
-  const [notifications, setNotifications] = useState([])
-  const navigate = useNavigate()
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({ tasks: 0, messages: 0, payments: 0 });
+  const [notifications, setNotifications] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const [profileRes, tasksRes, messagesRes, notifRes] = await Promise.all([
-          axios.get('/api/profile/'),
-          axios.get('/api/tasks/'),
-          axios.get('/api/messages/'),
-          axios.get('/api/notifications/')
-        ])
-        setUser(profileRes.data)
+          api.get('/api/profile/'),        // ✅
+          api.get('/api/tasks/'),          // ✅
+          api.get('/api/messages/'),       // ✅
+          api.get('/api/notifications/')   // ✅
+        ]);
+        setUser(profileRes.data);
         setStats({
           tasks: tasksRes.data.length,
           messages: messagesRes.data.length,
           payments: 0
-        })
-        setNotifications(notifRes.data)
+        });
+        setNotifications(notifRes.data);
       } catch (err) {
-        console.error('Dashboard load error:', err)
-        localStorage.removeItem('token')
-        delete axios.defaults.headers.common['Authorization']
-        navigate('/login')
+        console.error('Dashboard load error:', err);
+        localStorage.removeItem('token');
+        // No need to delete axios.defaults — api.js handles auth automatically
+        navigate('/login');
       }
-    }
-    loadData()
-  }, [navigate])
+    };
+    loadData();
+  }, [navigate]);
 
-  if (!user) return <div className="flex items-center justify-center h-full">Loading...</div>
+  if (!user) return <div className="flex items-center justify-center h-full">Loading...</div>;
 
   return (
     <div className="px-4 md:px-6 py-4 md:py-6">
@@ -163,7 +163,7 @@ export default function Dashboard() {
         &copy; All rights reserved. {new Date().getFullYear()}
       </footer>
     </div>
-  )
+  );
 }
 
 function StatCard({ title, value, icon: Icon, color, onClick }) {
@@ -182,5 +182,5 @@ function StatCard({ title, value, icon: Icon, color, onClick }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

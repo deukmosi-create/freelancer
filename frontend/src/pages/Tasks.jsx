@@ -1,47 +1,48 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { HeartIcon, BookmarkIcon, BriefcaseIcon, CurrencyDollarIcon, MapPinIcon } from '@heroicons/react/24/outline'
-import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
+import { HeartIcon, BookmarkIcon, BriefcaseIcon, CurrencyDollarIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState([])
-  const [bookmarked, setBookmarked] = useState([])
-  const navigate = useNavigate()
+  const [tasks, setTasks] = useState([]);
+  const [bookmarked, setBookmarked] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadTasks = async () => {
       try {
         const [tasksRes, bookmarksRes] = await Promise.all([
-          axios.get('/api/tasks/'),
-          axios.get('/api/tasks/bookmarked/')
-        ])
-        setTasks(tasksRes.data)
-        setBookmarked(bookmarksRes.data.map(t => t.id))
+          api.get('/api/tasks/'),              // ✅
+          api.get('/api/tasks/bookmarked/')    // ✅
+        ]);
+        setTasks(tasksRes.data);
+        setBookmarked(bookmarksRes.data.map(t => t.id));
       } catch (err) {
-        console.error(err)
+        console.error('Tasks load error:', err);
       }
-    }
-    loadTasks()
-  }, [])
+    };
+    loadTasks();
+  }, []);
 
   const handleApply = async (taskId) => {
     try {
-      await axios.post(`/api/tasks/${taskId}/apply/`)
+      await api.post(`/api/tasks/${taskId}/apply/`); // ✅
       // Show success toast later
     } catch (err) {
-      alert('Failed to apply')
+      console.error('Apply error:', err);
+      alert('Failed to apply');
     }
-  }
+  };
 
   const handleBookmark = async (taskId) => {
     try {
-      await axios.post(`/api/tasks/${taskId}/bookmark/`)
-      setBookmarked(prev => [...prev, taskId])
+      await api.post(`/api/tasks/${taskId}/bookmark/`); // ✅
+      setBookmarked(prev => [...prev, taskId]);
     } catch (err) {
-      console.error(err)
+      console.error('Bookmark error:', err);
     }
-  }
+  };
 
   return (
     <div>
@@ -127,5 +128,5 @@ export default function Tasks() {
         </div>
       )}
     </div>
-  )
+  );
 }

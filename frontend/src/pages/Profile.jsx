@@ -1,39 +1,41 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { UserIcon, PhoneIcon, DocumentTextIcon, CreditCardIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
+import { UserIcon, PhoneIcon, DocumentTextIcon, CreditCardIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function Profile() {
-  const [user, setUser] = useState(null)
-  const navigate = useNavigate()
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const res = await axios.get('/api/profile/')
-        setUser(res.data)
+        const res = await api.get('/api/profile/'); // ✅
+        setUser(res.data);
       } catch (err) {
-        console.error(err)
+        console.error('Profile load error:', err);
+        // Optionally redirect to login if auth fails
+        // navigate('/login');
       }
-    }
-    loadProfile()
-  }, [])
+    };
+    loadProfile();
+  }, []);
 
   const handleEdit = () => {
-    navigate('/profile-setup')
-  }
+    navigate('/profile-setup');
+  };
 
   const getPaymentMethodLabel = (method) => {
     switch (method) {
-      case 'mpesa': return 'M-Pesa'
-      case 'airtel': return 'Airtel Money'
-      case 'paypal': return 'PayPal'
-      case 'bank': return 'Bank Transfer'
-      default: return 'Not set'
+      case 'mpesa': return 'M-Pesa';
+      case 'airtel': return 'Airtel Money';
+      case 'paypal': return 'PayPal';
+      case 'bank': return 'Bank Transfer';
+      default: return 'Not set';
     }
-  }
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
   return (
     <div>
@@ -170,5 +172,5 @@ export default function Profile() {
         </div>
       </div>
     </div>
-  )
+  );
 }

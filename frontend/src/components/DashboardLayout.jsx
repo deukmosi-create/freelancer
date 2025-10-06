@@ -1,7 +1,7 @@
 // src/components/DashboardLayout.jsx
-import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation, Outlet } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
 import { 
   HomeIcon, 
   BriefcaseIcon, 
@@ -11,58 +11,58 @@ import {
   Bars3Icon,
   BellIcon,
   Cog6ToothIcon
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Tasks', href: '/tasks', icon: BriefcaseIcon },
   { name: 'Profile', href: '/profile', icon: UserIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
-]
+];
 
 export default function DashboardLayout() {
-  const [user, setUser] = useState(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [unreadNotifications, setUnreadNotifications] = useState(3) // mock data
-  const navigate = useNavigate()
-  const location = useLocation()
-  const dropdownRef = useRef(null)
+  const [user, setUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(3); // mock data
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dropdownRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false)
+        setDropdownOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const res = await axios.get('/api/profile/')
-        setUser(res.data)
+        const res = await api.get('/api/profile/'); // ✅
+        setUser(res.data);
       } catch (err) {
-        localStorage.removeItem('token')
-        delete axios.defaults.headers.common['Authorization']
-        navigate('/login')
+        console.error('Auth check failed:', err);
+        localStorage.removeItem('token');
+        // No need to delete axios.defaults — api.js handles auth
+        navigate('/login');
       }
-    }
-    loadUser()
-  }, [navigate])
+    };
+    loadUser();
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    delete axios.defaults.headers.common['Authorization']
-    navigate('/login')
-  }
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div className="flex min-h-screen bg-amber-50">
@@ -91,14 +91,14 @@ export default function DashboardLayout() {
         {/* Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
-            const Icon = item.icon
-            const active = isActive(item.href)
+            const Icon = item.icon;
+            const active = isActive(item.href);
             return (
               <button
                 key={item.name}
                 onClick={() => {
-                  navigate(item.href)
-                  setSidebarOpen(false)
+                  navigate(item.href);
+                  setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-300 ease-in-out
                   ${active 
@@ -109,7 +109,7 @@ export default function DashboardLayout() {
                 <Icon className={`h-5 w-5 ${active ? 'text-orange-400' : 'text-teal-300'}`} />
                 <span className="ml-3 font-medium">{item.name}</span>
               </button>
-            )
+            );
           })}
         </nav>
 
@@ -198,8 +198,8 @@ export default function DashboardLayout() {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 border border-gray-200">
                   <button
                     onClick={() => {
-                      navigate('/profile')
-                      setDropdownOpen(false)
+                      navigate('/profile');
+                      setDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-colors"
                   >
@@ -208,8 +208,8 @@ export default function DashboardLayout() {
                   </button>
                   <button
                     onClick={() => {
-                      navigate('/settings')
-                      setDropdownOpen(false)
+                      navigate('/settings');
+                      setDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition-colors"
                   >
@@ -219,8 +219,8 @@ export default function DashboardLayout() {
                   <hr className="my-1 border-gray-200" />
                   <button
                     onClick={() => {
-                      handleLogout()
-                      setDropdownOpen(false)
+                      handleLogout();
+                      setDropdownOpen(false);
                     }}
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors"
                   >
@@ -241,5 +241,5 @@ export default function DashboardLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }

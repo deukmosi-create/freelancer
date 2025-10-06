@@ -1,7 +1,7 @@
 // src/pages/ProfileSetup.jsx
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
 
 export default function ProfileSetup() {
   const [formData, setFormData] = useState({
@@ -11,60 +11,60 @@ export default function ProfileSetup() {
     bio: '',
     skills: [],
     profile_picture: ''
-  })
-  const [skillsInput, setSkillsInput] = useState('')
-  const navigate = useNavigate()
+  });
+  const [skillsInput, setSkillsInput] = useState('');
+  const navigate = useNavigate();
 
   // Load current profile on mount
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const res = await axios.get('/api/profile/')
-        setFormData(res.data)
+        const res = await api.get('/api/profile/'); // ✅
+        setFormData(res.data);
         if (res.data.skills.length > 0) {
-          setSkillsInput(res.data.skills.join(', '))
+          setSkillsInput(res.data.skills.join(', '));
         }
       } catch (err) {
-        console.error(err)
+        console.error('Profile setup load error:', err);
       }
-    }
-    loadProfile()
-  }, [])
+    };
+    loadProfile();
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSkillsChange = (e) => {
-    const value = e.target.value
-    setSkillsInput(value)
+    const value = e.target.value;
+    setSkillsInput(value);
     const skillsArray = value
       .split(',')
       .map(skill => skill.trim())
-      .filter(skill => skill !== '')
-    setFormData({ ...formData, skills: skillsArray })
-  }
+      .filter(skill => skill !== '');
+    setFormData({ ...formData, skills: skillsArray });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      await axios.patch('/api/profile/', formData)
+      await api.patch('/api/profile/', formData); // ✅
       
-      const profileRes = await axios.get('/api/profile/')
-      const user = profileRes.data
+      const profileRes = await api.get('/api/profile/'); // ✅
+      const user = profileRes.data;
       
       if (!user.payment_method || !user.payment_identifier) {
-        navigate('/payment')
+        navigate('/payment');
       } else if (!user.is_activated) {
-        navigate('/activate')
+        navigate('/activate');
       } else {
-        navigate('/dashboard')
+        navigate('/dashboard');
       }
     } catch (err) {
-      alert('Failed to save profile')
-      console.error(err)
+      console.error('Profile save error:', err);
+      alert('Failed to save profile');
     }
-  }
+  };
 
   return (
     <div 
@@ -164,9 +164,9 @@ export default function ProfileSetup() {
                     <button
                       type="button"
                       onClick={() => {
-                        const newSkills = formData.skills.filter((_, i) => i !== index)
-                        setFormData({ ...formData, skills: newSkills })
-                        setSkillsInput(newSkills.join(', '))
+                        const newSkills = formData.skills.filter((_, i) => i !== index);
+                        setFormData({ ...formData, skills: newSkills });
+                        setSkillsInput(newSkills.join(', '));
                       }}
                       className="ml-2 text-gray-500 hover:text-red-500 focus:outline-none"
                     >
@@ -212,7 +212,7 @@ export default function ProfileSetup() {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 // Reusable Input Component
@@ -232,5 +232,5 @@ function InputField({ label, name, type = 'text', placeholder, value, onChange, 
         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
       />
     </div>
-  )
+  );
 }

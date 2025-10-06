@@ -1,5 +1,7 @@
+// src/api.js
 import axios from 'axios';
 
+// ✅ Point to your Render backend
 const API_BASE_URL = 'https://freelancer-8m9p.onrender.com';
 
 const api = axios.create({
@@ -9,6 +11,7 @@ const api = axios.create({
   },
 });
 
+// Add auth token automatically if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {

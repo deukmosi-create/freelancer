@@ -1,8 +1,8 @@
 // src/pages/PaymentDetails.jsx
-import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { BuildingStorefrontIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api'; // ✅ Use centralized API client
+import { BuildingStorefrontIcon } from '@heroicons/react/24/outline';
 
 // Icons (unchanged)
 const MpesaIcon = () => (
@@ -10,21 +10,21 @@ const MpesaIcon = () => (
     <circle cx="8" cy="8" r="8" fill="#008000"/>
     <text x="8" y="11" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">M</text>
   </svg>
-)
+);
 
 const AirtelIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" className="mr-2">
     <rect width="16" height="16" fill="#E31837"/>
     <text x="8" y="11" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">A</text>
   </svg>
-)
+);
 
 const PayPalIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" className="mr-2">
     <path d="M11.5 4.5c-.3 0-.5.2-.5.5v1.5h-1V5c0-.3-.2-.5-.5-.5s-.5.2-.5.5v2c0 .3.2.5.5.5h1.5v1.5c0 .3.2.5.5.5s.5-.2.5-.5V7h1V8.5c0 .3.2.5.5.5s.5-.2.5-.5V6.5c0-.3-.2-.5-.5-.5h-1.5V4.5c0-.3-.2-.5-.5-.5z" fill="#003087"/>
     <path d="M4.5 7.5c-.3 0-.5.2-.5.5v1.5H3V8c0-.3-.2-.5-.5-.5S2 7.7 2 8v2c0 .3.2.5.5.5h1.5v1.5c0 .3.2.5.5.5s.5-.2.5-.5V10h1.5V11.5c0 .3.2.5.5.5s.5-.2.5-.5V9.5c0-.3-.2-.5-.5-.5H5.5V7.5c0-.3-.2-.5-.5-.5z" fill="#009CDE"/>
   </svg>
-)
+);
 
 // Licensed Banks in Kenya (CBK-listed)
 const KENYAN_BANKS = [
@@ -58,61 +58,61 @@ const KENYAN_BANKS = [
   "Standard Chartered Bank Kenya",
   "Victoria Commercial Bank",
   "Consolidated Bank of Kenya"
-].sort()
+].sort();
 
 export default function PaymentDetails() {
-  const [paymentMethod, setPaymentMethod] = useState('')
-  const [identifier, setIdentifier] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [bankDetails, setBankDetails] = useState({
     bankName: '',
     accountNumber: '',
     branchName: '' // renamed from swiftCode to branchName
-  })
-  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false)
-  const [bankSearch, setBankSearch] = useState('')
-  const navigate = useNavigate()
-  const dropdownRef = useRef(null)
+  });
+  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [bankSearch, setBankSearch] = useState('');
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsBankDropdownOpen(false)
+        setIsBankDropdownOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load saved payment details
   useEffect(() => {
     const loadPayment = async () => {
       try {
-        const res = await axios.get('/api/profile/')
+        const res = await api.get('/api/profile/'); // ✅
         if (res.data.payment_method) {
-          setPaymentMethod(res.data.payment_method)
+          setPaymentMethod(res.data.payment_method);
           if (res.data.payment_method === 'bank') {
-            const bankData = res.data.payment_identifier ? JSON.parse(res.data.payment_identifier) : {}
+            const bankData = res.data.payment_identifier ? JSON.parse(res.data.payment_identifier) : {};
             setBankDetails({
               bankName: bankData.bankName || '',
               accountNumber: bankData.accountNumber || '',
               branchName: bankData.branchName || bankData.swiftCode || '' // fallback to swiftCode if needed
-            })
+            });
           } else {
-            setIdentifier(res.data.payment_identifier || '')
+            setIdentifier(res.data.payment_identifier || '');
           }
         }
       } catch (err) {
-        console.error(err)
+        console.error('Payment load error:', err);
       }
-    }
-    loadPayment()
-  }, [])
+    };
+    loadPayment();
+  }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      let payload = { payment_method: paymentMethod }
+      let payload = { payment_method: paymentMethod };
       
       if (paymentMethod === 'bank') {
         // Save with branchName instead of swiftCode
@@ -120,49 +120,50 @@ export default function PaymentDetails() {
           bankName: bankDetails.bankName,
           accountNumber: bankDetails.accountNumber,
           branchName: bankDetails.branchName
-        })
+        });
       } else {
-        payload.payment_identifier = identifier
+        payload.payment_identifier = identifier;
       }
 
-      await axios.post('/api/payment/save/', payload)
-      navigate('/activate')
+      await api.post('/api/payment/save/', payload); // ✅
+      navigate('/activate');
     } catch (err) {
-      alert('Failed to save payment details')
+      console.error('Save payment error:', err);
+      alert('Failed to save payment details');
     }
-  }
+  };
 
   const renderIcon = (method) => {
     switch (method) {
-      case 'mpesa': return <MpesaIcon />
-      case 'airtel': return <AirtelIcon />
-      case 'paypal': return <PayPalIcon />
-      case 'bank': return <BuildingStorefrontIcon className="w-4 h-4 mr-2 text-gray-600" />
-      default: return null
+      case 'mpesa': return <MpesaIcon />;
+      case 'airtel': return <AirtelIcon />;
+      case 'paypal': return <PayPalIcon />;
+      case 'bank': return <BuildingStorefrontIcon className="w-4 h-4 mr-2 text-gray-600" />;
+      default: return null;
     }
-  }
+  };
 
   const getLabel = (method) => {
     switch (method) {
-      case 'mpesa': return 'M-Pesa'
-      case 'airtel': return 'Airtel Money'
-      case 'paypal': return 'PayPal'
-      case 'bank': return 'Bank Transfer'
-      default: return method
+      case 'mpesa': return 'M-Pesa';
+      case 'airtel': return 'Airtel Money';
+      case 'paypal': return 'PayPal';
+      case 'bank': return 'Bank Transfer';
+      default: return method;
     }
-  }
+  };
 
   // Filter banks based on search
   const filteredBanks = KENYAN_BANKS.filter(bank =>
     bank.toLowerCase().includes(bankSearch.toLowerCase())
-  )
+  );
 
   // Handle bank selection
   const handleBankSelect = (bank) => {
-    setBankDetails({ ...bankDetails, bankName: bank })
-    setBankSearch(bank)
-    setIsBankDropdownOpen(false)
-  }
+    setBankDetails({ ...bankDetails, bankName: bank });
+    setBankSearch(bank);
+    setIsBankDropdownOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -185,9 +186,9 @@ export default function PaymentDetails() {
                   value={method}
                   checked={paymentMethod === method}
                   onChange={(e) => {
-                    setPaymentMethod(e.target.value)
+                    setPaymentMethod(e.target.value);
                     if (e.target.value !== 'bank') {
-                      setIdentifier('')
+                      setIdentifier('');
                     }
                   }}
                   className="mr-3 h-4 w-4 text-teal-600 focus:ring-teal-500"
@@ -313,5 +314,5 @@ export default function PaymentDetails() {
         </form>
       </div>
     </div>
-  )
+  );
 }
