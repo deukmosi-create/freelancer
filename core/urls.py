@@ -17,4 +17,6 @@ urlpatterns = [
     path('tasks/bookmarked/', views.bookmarked_tasks),
     path('messages/', views.messages_view),
     path('check-activation/', views.check_activation),
+    path('mpesa/initiate/', views.initiate_mpesa_payment),
+    path('mpesa/confirmation/', views.mpesa_confirmation),  # Must be public
 ]

@@ -142,3 +142,11 @@ else:
 
 if cred and not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
+    # backend/settings.py
+
+# M-Pesa Daraja API
+MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET')
+MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')  # Use 174379 for sandbox
+MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY')
+MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL')  # e.g., https://yourdomain.com/api/mpesa/confirmation/

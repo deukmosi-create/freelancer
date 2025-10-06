@@ -1,3 +1,7 @@
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from .mpesa import lipa_na_mpesa_online
 from rest_framework import status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -216,3 +220,57 @@ def messages_view(request):
 @permission_classes([IsAuthenticated])
 def check_activation(request):
     return Response({'is_activated': request.user.is_activated})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_mpesa_payment(request):
+    """Initiate STK Push for KES 300 activation fee"""
+    phone = request.data.get('phone_number')
+    if not phone or len(phone) != 10:
+        return Response({'error': 'Invalid phone number'}, status=400)
+    
+    # Format phone: 2547XXXXXXXX
+    if phone.startswith('0'):
+        phone = '254' + phone[1:]
+    elif phone.startswith('254'):
+        pass
+    else:
+        return Response({'error': 'Phone must start with 0 or 254'}, status=400)
+
+    user = request.user
+    try:
+        response = lipa_na_mpesa_online(
+            phone_number=phone,
+            amount=300,
+            account_reference=f"ACTIVATE-{user.id}",
+            transaction_desc="FreelancerKE Activation Fee"
+        )
+        return Response(response)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def mpesa_confirmation(request):
+    """Handle M-Pesa callback"""
+    if request.method == "POST":
+        data = json.loads(request.body)
+        result = data.get('Body', {}).get('stkCallback', {})
+        checkout_id = result.get('CheckoutRequestID')
+        result_code = result.get('ResultCode')
+
+        if result_code == 0:  # Success
+            # Find user by metadata (you can store mapping in DB or cache)
+            # For simplicity, assume you store {checkout_id: user_id} in cache
+            from django.core.cache import cache
+            user_id = cache.get(f"mpesa_checkout_{checkout_id}")
+            if user_id:
+                try:
+                    user = User.objects.get(id=user_id)
+                    user.is_activated = True
+                    user.save()
+                except User.DoesNotExist:
+                    pass
+
+        return HttpResponse("OK")
+    return HttpResponse("Invalid request", status=400)
