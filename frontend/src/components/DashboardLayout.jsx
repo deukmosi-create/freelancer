@@ -8,9 +8,7 @@ import {
   UserIcon, 
   ChatBubbleLeftRightIcon, 
   ArrowLeftOnRectangleIcon,
-  Bars3Icon,
-  BellIcon,
-  Cog6ToothIcon
+  Bars3Icon
 } from '@heroicons/react/24/outline';
 
 const navItems = [
@@ -24,7 +22,6 @@ export default function DashboardLayout() {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(3);
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
@@ -63,7 +60,7 @@ export default function DashboardLayout() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="flex min-h-screen bg-gray-50"> {/* #F7F9FA ≈ bg-gray-50 */}
+    <div className="flex min-h-screen bg-gray-50">
       {/* === SIDEBAR === */}
       <div
         className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#004D61] flex flex-col transition-transform duration-300 ease-in-out
@@ -143,21 +140,8 @@ export default function DashboardLayout() {
           {/* Spacer for desktop alignment */}
           <div className="hidden md:block w-64"></div>
 
-          {/* Right Icons */}
+          {/* Right Icons — ONLY Messages + Avatar */}
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate('/notifications')}
-              className="text-gray-700 hover:text-teal-600 transition-colors relative"
-            >
-              <BellIcon className="h-6 w-6" />
-              {unreadNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                  <span className="animate-ping absolute h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-4 w-4 bg-teal-500"></span>
-                </span>
-              )}
-            </button>
-
             <button
               onClick={() => navigate('/messages')}
               className="text-gray-700 hover:text-teal-600 transition-colors"
@@ -189,15 +173,7 @@ export default function DashboardLayout() {
                   >
                     <UserIcon className="h-4 w-4 inline mr-2 text-teal-600" /> Profile
                   </button>
-                  <button
-                    onClick={() => {
-                      navigate('/settings');
-                      setDropdownOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700"
-                  >
-                    <Cog6ToothIcon className="h-4 w-4 inline mr-2 text-teal-600" /> Settings
-                  </button>
+                  {/* ✅ Settings REMOVED */}
                   <hr className="my-1 border-gray-200" />
                   <button
                     onClick={() => {
