@@ -1,113 +1,118 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react';
 
 export default function Homepage() {
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
-        setIsScrolled(true)
+        setIsScrolled(true);
       } else {
-        setIsScrolled(false)
+        setIsScrolled(false);
       }
-    }
+    };
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Enhanced smooth scroll with offset
+  useEffect(() => {
+    const handleAnchorClick = (e) => {
+      const href = e.target.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        const element = document.querySelector(href);
+        if (element) {
+          const offset = 80;
+          window.scrollTo({
+            top: element.offsetTop - offset,
+            behavior: 'smooth'
+          });
+        }
+      }
+    };
+
+    document.addEventListener('click', handleAnchorClick);
+    return () => document.removeEventListener('click', handleAnchorClick);
+  }, []);
+
+  const navLinks = [
+    { name: 'Home', id: 'home' },
+    { name: 'About', id: 'why-choose-us' },
+    { name: 'Features', id: 'features' },
+    { name: 'How It Works', id: 'how-it-works' },
+    { name: 'Contact', id: 'contact' }
+  ];
 
   return (
-    <div className="bg-white">
+    <div className="bg-white scroll-smooth">
       {/* Navigation Bar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-gray-900' : 'bg-transparent'} py-4 px-6`}>
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Logo (Placeholder) */}
           <div className="text-white font-bold text-xl">FreelancerKE</div>
           
-          {/* Nav Links */}
           <div className="hidden md:flex space-x-8">
-            {['Home', 'About', 'Features', 'How It Works', 'Contact'].map((item) => (
+            {navLinks.map((item) => (
               <a 
-                key={item}
-                href="#" 
+                key={item.name}
+                href={`#${item.id}`} 
                 className="text-white hover:text-orange-400 transition-colors relative group"
               >
-                {item}
+                {item.name}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-400 transition-all group-hover:w-full"></span>
               </a>
             ))}
-            {/* Login Link */}
-            <Link 
-              to="/login" 
+            <a 
+              href="/login" 
               className="text-white hover:text-orange-400 transition-colors relative group"
             >
               Login
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-400 transition-all group-hover:w-full"></span>
-            </Link>
+            </a>
           </div>
           
-          {/* Get Started Button → Links to /login */}
-          <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full transition-colors">
+          <a href="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full transition-colors">
             Get Started
-          </Link>
+          </a>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-16 bg-gradient-to-r from-gray-900 via-blue-900 to-teal-700 overflow-hidden">
-        {/* Geometric Pattern Overlay */}
-        <div className="absolute inset-0 opacity-10">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 0 20 L 20 20 L 20 0" fill="none" stroke="white" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-          {/* Text Content */}
-          <div className="md:w-1/2 text-white">
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-              Work. Earn. Grow.
-            </h1>
-            {/* UPDATED TAGLINE */}
-            <p className="text-lg mb-8">
-              Your trusted platform with secure payments and limitless opportunities.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Get Started → /login */}
-              <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1">
-                Get Started
-              </Link>
-              {/* Learn More REMOVED */}
-            </div>
-          </div>
-
-          {/* Illustration (STATIC image) */}
-          <div className="md:w-1/2 flex justify-center">
-            <div className="w-full max-w-md h-64 bg-white/10 backdrop-blur-lg rounded-xl flex items-center justify-center">
-              <img 
-                src="https://picsum.photos/600/400?random=1" 
-                alt="Freelancers at work" 
-                className="rounded-lg shadow-lg max-h-full"
-              />
-            </div>
+      {/* Hero Section - FULL BACKGROUND IMAGE */}
+      <section 
+        id="home"
+        className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden"
+        style={{
+          backgroundImage: `url(https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-white">
+            Work. Earn. Grow.
+          </h1>
+          <p className="text-lg mb-8 text-gray-200 max-w-2xl">
+            Your trusted platform with secure payments and limitless opportunities.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a href="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1">
+              Get Started
+            </a>
           </div>
         </div>
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-16 bg-gray-50">
+      <section id="why-choose-us" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
           <div className="flex flex-col md:flex-row gap-8 items-center">
             <div className="md:w-1/2">
               <img 
-                src="https://picsum.photos/600/400?random=2" 
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80" 
                 alt="Collaboration" 
                 className="rounded-lg shadow-lg"
               />
@@ -155,7 +160,7 @@ export default function Homepage() {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-gray-900 text-white">
+      <section id="features" className="py-16 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-12">Everything You Need in One Place</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -179,7 +184,7 @@ export default function Homepage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-amber-50">
+      <section id="how-it-works" className="py-16 bg-amber-50">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
           <div className="flex flex-col md:flex-row gap-8 justify-center">
@@ -201,7 +206,7 @@ export default function Homepage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-16 bg-teal-100">
+      <section id="testimonials" className="py-16 bg-teal-100">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl font-bold text-center mb-12">What Our Freelancers Say</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -228,18 +233,17 @@ export default function Homepage() {
       </section>
 
       {/* Final CTA Banner */}
-      <section className="py-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center">
+      <section id="cta" className="py-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Your Freelance Journey?</h2>
-          {/* Get Started → /login */}
-          <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+          <a href="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
             Get Started
-          </Link>
+          </a>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer id="contact" className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -249,8 +253,12 @@ export default function Homepage() {
             <div>
               <h3 className="font-bold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                {['Home', 'About', 'Features', 'How It Works', 'Contact'].map((item) => (
-                  <li key={item}><a href="#" className="text-gray-400 hover:text-white">{item}</a></li>
+                {navLinks.map((item) => (
+                  <li key={item.name}>
+                    <a href={`#${item.id}`} className="text-gray-400 hover:text-white">
+                      {item.name}
+                    </a>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -268,5 +276,5 @@ export default function Homepage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

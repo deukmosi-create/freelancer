@@ -32,6 +32,7 @@ export default function App() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Route>
     </Routes>
   )
