@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import PermissionDenied  # ← ADDED
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -158,7 +159,7 @@ class TaskListView(generics.ListAPIView):
 
     def get_queryset(self):
         if not self.request.user.is_activated:
-            return Task.objects.none()
+            raise PermissionDenied("Account not activated")  # ← FIXED: Now raises 403
         return Task.objects.all()
 
 @api_view(['GET'])
