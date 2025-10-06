@@ -1,49 +1,52 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Login() {
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     first_name: '',
     last_name: ''
-  })
-  const navigate = useNavigate()
+  });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
+      // ✅ Pointing to your Render backend
+      const API_BASE_URL = 'https://freelancer-8m9p.onrender.com';
+      
       const url = isLogin 
-        ? '/api/auth/login/' 
-        : '/api/auth/register/'
+        ? `${API_BASE_URL}/api/auth/login/` 
+        : `${API_BASE_URL}/api/auth/register/`;
       
-      const res = await axios.post(url, formData)
+      const res = await axios.post(url, formData);
       
-      localStorage.setItem('token', res.data.token)
-      axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`
+      localStorage.setItem('token', res.data.token);
+      axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`;
       
-      // Redirect based on completion
-      const profile = res.data.user
+      // Redirect based on profile completion
+      const profile = res.data.user;
       if (!profile.phone_number || profile.skills.length === 0) {
-        navigate('/profile-setup')
+        navigate('/profile-setup');
       } else if (!profile.payment_method || !profile.payment_identifier) {
-        navigate('/payment')
+        navigate('/payment');
       } else if (!profile.is_activated) {
-        navigate('/activate')
+        navigate('/activate');
       } else {
-        navigate('/dashboard')
+        navigate('/dashboard');
       }
     } catch (err) {
-      console.error('Auth error:', err)
-      alert(err.response?.data?.error || 'Something went wrong. Please try again.')
+      console.error('Auth error:', err);
+      alert(err.response?.data?.error || 'Something went wrong. Please try again.');
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-amber-50 flex flex-col md:flex-row">
@@ -179,5 +182,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }
