@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Login() {
-  const [isLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(true); // ✅ Fixed: added setIsLogin
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -19,7 +19,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // ✅ Pointing to your Render backend
+      // ✅ Fixed: removed extra spaces in URL
       const API_BASE_URL = 'https://freelancer-8m9p.onrender.com';
       
       const url = isLogin 
@@ -46,6 +46,12 @@ export default function Login() {
       console.error('Auth error:', err);
       alert(err.response?.data?.error || 'Something went wrong. Please try again.');
     }
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    // Optional: reset form when switching modes
+    setFormData({ email: '', password: '', first_name: '', last_name: '' });
   };
 
   return (
@@ -104,6 +110,7 @@ export default function Login() {
                     name="first_name"
                     placeholder="First Name"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    value={formData.first_name}
                     onChange={handleChange}
                     required={!isLogin}
                   />
@@ -112,6 +119,7 @@ export default function Login() {
                     name="last_name"
                     placeholder="Last Name"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    value={formData.last_name}
                     onChange={handleChange}
                     required={!isLogin}
                   />
@@ -124,6 +132,7 @@ export default function Login() {
               name="email"
               placeholder="Email Address"
               className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              value={formData.email}
               onChange={handleChange}
               required
             />
@@ -133,6 +142,7 @@ export default function Login() {
               name="password"
               placeholder="Password"
               className="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              value={formData.password}
               onChange={handleChange}
               required
             />
@@ -172,7 +182,7 @@ export default function Login() {
             <p className="text-gray-600">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={toggleMode}
                 className="text-teal-600 hover:text-teal-800 font-medium underline"
               >
                 {isLogin ? 'Sign Up' : 'Login'}
