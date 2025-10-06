@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; // ✅ Use centralized API client
+import api from '../api';
 import { 
   BriefcaseIcon, 
   ChatBubbleLeftRightIcon, 
@@ -19,10 +19,10 @@ export default function Dashboard() {
     const loadData = async () => {
       try {
         const [profileRes, tasksRes, messagesRes, notifRes] = await Promise.all([
-          api.get('/api/profile/'),        // ✅
-          api.get('/api/tasks/'),          // ✅
-          api.get('/api/messages/'),       // ✅
-          api.get('/api/notifications/')   // ✅
+          api.get('/api/profile/'),
+          api.get('/api/tasks/'),
+          api.get('/api/messages/'),
+          api.get('/api/notifications/')
         ]);
         setUser(profileRes.data);
         setStats({
@@ -34,7 +34,6 @@ export default function Dashboard() {
       } catch (err) {
         console.error('Dashboard load error:', err);
         localStorage.removeItem('token');
-        // No need to delete axios.defaults — api.js handles auth automatically
         navigate('/login');
       }
     };
@@ -47,7 +46,7 @@ export default function Dashboard() {
     <div className="px-4 md:px-6 py-4 md:py-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user.first_name || 'Freelancer'}!</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Welcome back, {user.first_name || 'Freelancer'}!</h1>
         <p className="text-gray-600 mt-1">Here’s an overview of your account today.</p>
       </div>
 
@@ -55,7 +54,7 @@ export default function Dashboard() {
       <div className={`mb-8 rounded-xl shadow p-6 ${user.is_activated ? 'border-l-4 border-green-500 bg-white' : 'border-l-4 border-teal-500 bg-white'}`}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">Account Status</h3>
+            <h3 className="text-lg font-medium text-gray-800">Account Status</h3>
             <p className="mt-1 text-gray-600">
               {user.is_activated 
                 ? 'Your account is fully activated. You can browse and apply to tasks.' 
@@ -70,7 +69,7 @@ export default function Dashboard() {
           ) : (
             <button
               onClick={() => navigate('/activate')}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
             >
               Activate Now
             </button>
@@ -84,14 +83,14 @@ export default function Dashboard() {
           title="Tasks Available" 
           value={stats.tasks} 
           icon={BriefcaseIcon} 
-          color="bg-orange-100 text-orange-700" 
+          color="bg-teal-100 text-teal-700" 
           onClick={() => navigate('/tasks')}
         />
         <StatCard 
           title="Messages" 
           value={stats.messages} 
           icon={ChatBubbleLeftRightIcon} 
-          color="bg-teal-100 text-teal-700" 
+          color="bg-cyan-100 text-cyan-700" 
           onClick={() => navigate('/messages')}
         />
         <StatCard 
@@ -106,7 +105,7 @@ export default function Dashboard() {
       {/* Recent Messages & Tasks Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Messages</h3>
+          <h3 className="text-lg font-medium text-gray-800 mb-4">Recent Messages</h3>
           {notifications.length === 0 ? (
             <p className="text-gray-500">No recent messages</p>
           ) : (
@@ -117,7 +116,7 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-gray-700">C</span>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-900">{notif.message}</p>
+                    <p className="text-sm text-gray-800">{notif.message}</p>
                     <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
                   </div>
                 </div>
@@ -133,13 +132,13 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Latest Tasks</h3>
+          <h3 className="text-lg font-medium text-gray-800 mb-4">Latest Tasks</h3>
           {user.is_activated ? (
             <div className="space-y-4">
               <p className="text-gray-600">Browse the latest opportunities and start earning today.</p>
               <button 
                 onClick={() => navigate('/tasks')}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 Browse More Tasks
               </button>
@@ -149,7 +148,7 @@ export default function Dashboard() {
               <p className="text-gray-600 mb-4">Activate your account to view and apply to tasks.</p>
               <button 
                 onClick={() => navigate('/activate')}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
                 Activate to View Tasks
               </button>
@@ -178,7 +177,7 @@ function StatCard({ title, value, icon: Icon, color, onClick }) {
         </div>
         <div className="ml-4">
           <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+          <p className="text-2xl font-semibold text-gray-800">{value}</p>
         </div>
       </div>
     </div>
