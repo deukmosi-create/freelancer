@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard'
 import Tasks from './pages/Tasks'
 import Profile from './pages/Profile'
 import Messages from './pages/Messages'
+import NotificationsPage from './pages/NotificationsPage' // ✅ Added missing import
 import DashboardLayout from './components/DashboardLayout'
 
 // Wrapper for public (non-auth) pages
