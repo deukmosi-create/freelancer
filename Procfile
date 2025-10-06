@@ -1,1 +1,1 @@
-web: gunicorn kenya-freelancer-backend.wsgi:application
+web: gunicorn backend.wsgi:application
