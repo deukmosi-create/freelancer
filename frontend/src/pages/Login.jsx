@@ -1,219 +1,210 @@
-// src/pages/Login.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider, facebookProvider } from '../firebase';
+// src/components/DashboardLayout.jsx
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
+import api from '../api';
+import { 
+  HomeIcon, 
+  BriefcaseIcon, 
+  UserIcon, 
+  ChatBubbleLeftRightIcon, 
+  ArrowLeftOnRectangleIcon,
+  Bars3Icon
+} from '@heroicons/react/24/outline';
 
-export default function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    first_name: '',
-    last_name: ''
-  });
+const navItems = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Tasks', href: '/tasks', icon: BriefcaseIcon },
+  { name: 'Profile', href: '/profile', icon: UserIcon },
+  { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
+];
+
+export default function DashboardLayout() {
+  const [user, setUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const dropdownRef = useRef(null);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const API_BASE_URL = 'https://freelancer-8m9p.onrender.com';
-      const url = isLogin 
-        ? `${API_BASE_URL}/api/auth/login/` 
-        : `${API_BASE_URL}/api/auth/register/`;
-      
-      const res = await axios.post(url, formData);
-      localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`;
-      
-      const profile = res.data.user;
-      if (!profile.phone_number || profile.skills.length === 0) {
-        navigate('/profile-setup');
-      } else if (!profile.payment_method || !profile.payment_identifier) {
-        navigate('/payment');
-      } else if (!profile.is_activated) {
-        navigate('/activate');
-      } else {
-        navigate('/dashboard');
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
       }
-    } catch (err) {
-      console.error('Auth error:', err);
-      alert(err.response?.data?.error || 'Something went wrong. Please try again.');
-    }
-  };
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleFirebaseLogin = async (provider) => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-
-      const API_BASE_URL = 'https://freelancer-8m9p.onrender.com';
-      const res = await axios.post(`${API_BASE_URL}/api/auth/firebase/`, {
-        idToken
-      });
-
-      localStorage.setItem('token', res.data.token);
-      axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`;
-      
-      const profile = res.data.user;
-      if (!profile.phone_number || profile.skills.length === 0) {
-        navigate('/profile-setup');
-      } else if (!profile.payment_method || !profile.payment_identifier) {
-        navigate('/payment');
-      } else if (!profile.is_activated) {
-        navigate('/activate');
-      } else {
-        navigate('/dashboard');
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const res = await api.get('/api/profile/');
+        setUser(res.data);
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        localStorage.removeItem('token');
+        navigate('/login');
       }
-    } catch (err) {
-      console.error('Firebase login error:', err);
-      let message = 'Login failed. Please try again.';
-      if (err.code === 'auth/popup-closed-by-user') {
-        message = 'Login popup was closed.';
-      } else if (err.code === 'auth/account-exists-with-different-credential') {
-        message = 'An account with this email already exists. Please log in with your password.';
-      }
-      alert(message);
-    }
+    };
+    loadUser();
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setFormData({ email: '', password: '', first_name: '', last_name: '' });
-  };
+  if (!user) return null;
+
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-6">
-          <div className="text-gray-900 font-bold text-xl">FreelancerKE</div>
-        </div>
-
-        {/* Heading */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          {isLogin ? 'Login to Your Account' : 'Create an Account'}
-        </h2>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          {!isLogin && (
-            <>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <input
-                  type="text"
-                  name="first_name"
-                  placeholder="First Name"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                />
-                <input
-                  type="text"
-                  name="last_name"
-                  placeholder="Last Name"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                />
-              </div>
-            </>
-          )}
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300"
-          >
-            {isLogin ? 'Login' : 'Sign Up'}
-          </button>
-        </form>
-
-        {/* Social Login */}
-        <div className="mt-6">
-          <p className="text-center text-gray-500 mb-4">Or continue with</p>
-          <div className="space-y-3">
-            {/* Google Button - Improved */}
-            <button
-              onClick={() => handleFirebaseLogin(googleProvider)}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
-            >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.25 1.12-1.03 2.14-2.23 2.7V21h3.77c2.25-2.05 3.77-5.05 3.77-8.75z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 21c2.25 0 4.09-.87 5.34-2.29l-2.83-2.23c-1.02.65-2.25.98-3.51.98a6.01 6.01 0 01-3.51-1.03L7.83 16.9c1.02 1.02 2.55 1.67 4.17 1.67z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.83 13.75a6.01 6.01 0 010-2.5L7.83 9.23c-.94-.94-2.18-1.48-3.51-1.48A6.01 6.01 0 002.5 9.23l2.83 2.23c.65 1.02 1.77 1.77 3.51 1.77z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 21c3.36 0 6.08-2.05 6.96-4.95H12V12h5.92c-.35-1.02-1.03-2.04-2.23-2.7V5.05H12v4.26h5.92c-.25 1.12-1.03 2.14-2.23 2.7V21z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Google
-            </button>
-
-            {/* Facebook Button */}
-            <button 
-              onClick={() => handleFirebaseLogin(facebookProvider)}
-              className="w-full bg-[#1877F2] text-white py-2 px-4 rounded-lg hover:bg-[#166FE5] transition-colors flex items-center justify-center"
-            >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                <path
-                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.991 4.367 10.982 10.211 11.852v-8.384H7.028v-3.47h3.028V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.384C19.632 23.055 24 18.064 24 12.073z"
-                  fill="currentColor"
-                />
-              </svg>
-              Facebook
-            </button>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* === SIDEBAR === */}
+      <div
+        className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#004D61] flex flex-col transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+      >
+        {/* Brand */}
+        <div className="flex items-center justify-center px-4 py-6 border-b border-teal-700/30">
+          <div className="bg-teal-400 w-10 h-10 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-xl">F</span>
           </div>
+          <span className="ml-3 text-xl font-bold text-white">FreelancerKE</span>
         </div>
 
-        {/* Switch Link */}
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
-            <button
-              onClick={toggleMode}
-              className="text-teal-600 hover:text-teal-800 font-medium underline"
-            >
-              {isLogin ? 'Sign Up' : 'Login'}
-            </button>
-          </p>
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            return (
+              <button
+                key={item.name}
+                onClick={() => {
+                  navigate(item.href);
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all
+                  ${active 
+                    ? 'bg-gradient-to-r from-teal-500 to-cyan-400 text-white shadow-md' 
+                    : 'text-teal-100 hover:text-white hover:bg-teal-700/30'}`}
+              >
+                <Icon className={`h-5 w-5 ${active ? 'text-white' : 'text-teal-200'}`} />
+                <span className="ml-3 font-medium">{item.name}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User & Logout */}
+        <div className="px-4 py-6 border-t border-teal-700/30">
+          <button
+            onClick={() => navigate('/profile')}
+            className="flex items-center mb-4 w-full text-left focus:outline-none hover:bg-teal-800/40 rounded-lg p-2"
+          >
+            <div className="h-10 w-10 rounded-full bg-teal-200 flex items-center justify-center">
+              <span className="font-medium text-teal-800">
+                {user.first_name?.[0] || user.email[0]?.toUpperCase()}
+              </span>
+            </div>
+            <div className="ml-3 hidden md:block">
+              <p className="text-sm font-medium text-white">{user.first_name || 'User'}</p>
+              <p className="text-xs text-teal-200 truncate max-w-[120px]">{user.email}</p>
+            </div>
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-2 text-left text-teal-200 rounded-lg hover:bg-red-900/30 hover:text-red-200"
+          >
+            <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+            <span className="ml-3 font-medium">Logout</span>
+          </button>
         </div>
       </div>
+
+      {/* === FULL-WIDTH TOPBAR === */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-white shadow-sm h-14 border-b border-gray-200">
+        <div className="h-full px-4 flex items-center justify-between max-w-7xl mx-auto">
+          {/* Hamburger (mobile) */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="text-gray-700 hover:text-teal-600 transition-colors"
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Spacer for desktop alignment */}
+          <div className="hidden md:block w-64"></div>
+
+          {/* Right Icons — ONLY Messages + Avatar */}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/messages')}
+              className="text-gray-700 hover:text-teal-600 transition-colors"
+            >
+              <ChatBubbleLeftRightIcon className="h-6 w-6" />
+            </button>
+
+            {/* User Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center focus:outline-none"
+              >
+                <div className="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                  <span className="font-medium text-teal-800">
+                    {user.first_name?.[0] || user.email[0]?.toUpperCase()}
+                  </span>
+                </div>
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-30 border border-gray-200">
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700"
+                  >
+                    <UserIcon className="h-4 w-4 inline mr-2 text-teal-600" /> Profile
+                  </button>
+                  {/* ✅ Settings REMOVED */}
+                  <hr className="my-1 border-gray-200" />
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700"
+                  >
+                    <ArrowLeftOnRectangleIcon className="h-4 w-4 inline mr-2 text-red-600" /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* === MAIN CONTENT AREA === */}
+      <div className="flex flex-1 flex-col md:ml-64 pt-14">
+        <main className="flex-1 p-4 md:p-6">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
