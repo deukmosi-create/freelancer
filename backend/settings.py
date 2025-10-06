@@ -4,6 +4,7 @@ Django settings for backend project.
 
 from pathlib import Path
 import os
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -108,20 +109,36 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS Settings — ✅ ADD YOUR VERCEL URL HERE
+# CORS Settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "https://freelancer-gray.vercel.app",  # ← Replace with your actual Vercel URL
+    "https://freelancer-gray.vercel.app",
 ]
 
-# CSRF Settings — ✅ MUST MATCH CORS
+# CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
-    "https://freelancer-gray.vercel.app",  # ← Same as above
+    "https://freelancer-gray.vercel.app",
 ]
 
 # Allow credentials (cookies, tokens)
 CORS_ALLOW_CREDENTIALS = True
-
-# Optional: Disable CORS wildcards
 CORS_ALLOW_ALL_ORIGINS = False
+
+# === FIREBASE CONFIG ===
+import firebase_admin
+from firebase_admin import credentials
+
+FIREBASE_SERVICE_ACCOUNT = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+if FIREBASE_SERVICE_ACCOUNT:
+    cred = credentials.Certificate(json.loads(FIREBASE_SERVICE_ACCOUNT))
+else:
+    # For local development only
+    cred_path = os.path.join(BASE_DIR, 'firebase-service-account.json')
+    if os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+    else:
+        cred = None
+
+if cred and not firebase_admin._apps:
+    firebase_admin.initialize_app(cred)

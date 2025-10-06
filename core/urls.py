@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('auth/login/', views.login_view),
     path('auth/register/', views.register_view),
+    path('auth/firebase/', views.firebase_login),  # ← NEW
     path('profile/', views.profile_view),
     path('payment/save/', views.save_payment_details),
     path('activate/', views.activate_account),

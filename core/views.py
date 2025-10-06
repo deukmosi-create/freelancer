@@ -2,7 +2,7 @@ from rest_framework import status, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated, AllowAny  # ← Added AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -15,7 +15,7 @@ from .serializers import (
 
 # ------------------ AUTH ------------------
 @api_view(['POST'])
-@permission_classes([AllowAny])  # ← PUBLIC ACCESS
+@permission_classes([AllowAny])
 def login_view(request):
     email = request.data.get('email')
     password = request.data.get('password')
@@ -29,7 +29,7 @@ def login_view(request):
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # ← PUBLIC ACCESS
+@permission_classes([AllowAny])
 def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
@@ -40,6 +40,58 @@ def register_view(request):
             'user': UserSerializer(user).data
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def firebase_login(request):
+    """
+    Firebase ID token login.
+    Expects: { "idToken": "ey..." }
+    """
+    id_token = request.data.get('idToken')
+    if not id_token:
+        return Response({'error': 'idToken is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        import firebase_admin
+        from firebase_admin import auth as firebase_auth
+        decoded_token = firebase_auth.verify_id_token(id_token)
+        firebase_uid = decoded_token['uid']
+        email = decoded_token.get('email')
+        name = decoded_token.get('name', '')
+        first_name = ''
+        last_name = ''
+
+        if name:
+            name_parts = name.split(' ', 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        if not email:
+            return Response({'error': 'Email not provided by provider'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                'first_name': first_name,
+                'last_name': last_name,
+                'oauth_provider': 'firebase',
+            }
+        )
+
+        if not created and not user.oauth_provider:
+            user.oauth_provider = 'firebase'
+            user.save()
+
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user': UserSerializer(user).data
+        })
+
+    except Exception as e:
+        print(f"Firebase login error: {str(e)}")
+        return Response({'error': 'Authentication failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 # ------------------ PROFILE ------------------
 @api_view(['GET', 'PATCH'])
@@ -76,7 +128,6 @@ def activate_account(request):
             {'error': 'Payment details required before activation'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    # Simulate successful payment
     user.is_activated = True
     user.save()
     return Response({'message': 'Account activated successfully', 'is_activated': True})
