@@ -48,7 +48,7 @@ export default function Homepage() {
           </div>
           
           {/* Get Started Button → Links to /login */}
-          <Link to="/login" className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-full transition-colors">
+          <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full transition-colors">
             Get Started
           </Link>
         </div>
@@ -74,22 +74,20 @@ export default function Homepage() {
             <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
               Work. Earn. Grow.
             </h1>
+            {/* UPDATED TAGLINE */}
             <p className="text-lg mb-8">
-              The freelancing platform designed for Kenya, with secure payments and endless opportunities.
+              Your trusted platform with secure payments and limitless opportunities.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Get Started → /login */}
-              <Link to="/login" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1">
+              <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1">
                 Get Started
               </Link>
-              {/* Learn More → /login */}
-              <Link to="/login" className="border border-white text-white hover:bg-teal-700 hover:border-teal-700 font-medium py-3 px-8 rounded-lg transition-colors">
-                Learn More
-              </Link>
+              {/* Learn More REMOVED */}
             </div>
           </div>
 
-          {/* Illustration (Placeholder) */}
+          {/* Illustration (STATIC image) */}
           <div className="md:w-1/2 flex justify-center">
             <div className="w-full max-w-md h-64 bg-white/10 backdrop-blur-lg rounded-xl flex items-center justify-center">
               <img 
@@ -234,7 +232,7 @@ export default function Homepage() {
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Your Freelance Journey?</h2>
           {/* Get Started → /login */}
-          <Link to="/login" className="bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+          <Link to="/login" className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
             Get Started
           </Link>
         </div>
@@ -243,7 +241,7 @@ export default function Homepage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
               <div className="text-white font-bold text-xl mb-4">FreelancerKE</div>
               <p className="text-gray-400">Helping Kenyan freelancers find work, earn money, and grow their careers.</p>
@@ -260,20 +258,8 @@ export default function Homepage() {
               <h3 className="font-bold mb-4">Contact</h3>
               <ul className="space-y-2">
                 <li><a href="mailto:support@freelancerke.com" className="text-gray-400 hover:text-white">support@freelancerke.com</a></li>
-                <li><a href="tel:+254712345678" className="text-gray-400 hover:text-white">+254 712 345 678</a></li>
+                <li><a href="tel:+254791043674" className="text-gray-400 hover:text-white">+254 791 043 674</a></li>
               </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">Follow Us</h3>
-              <div className="flex space-x-4">
-                {['Facebook', 'Twitter', 'Instagram', 'LinkedIn'].map((social) => (
-                  <a key={social} href="#" className="text-gray-400 hover:text-orange-400 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.991 4.367 10.982 10.211 11.852v-8.384H7.028v-3.47h3.028V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.384C19.632 23.055 24 18.064 24 12.073z" />
-                    </svg>
-                  </a>
-                ))}
-              </div>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-4 text-center text-gray-500 text-sm">
