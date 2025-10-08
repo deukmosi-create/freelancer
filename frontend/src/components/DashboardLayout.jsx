@@ -8,12 +8,14 @@ import {
   UserIcon, 
   ChatBubbleLeftRightIcon, 
   ArrowLeftOnRectangleIcon,
-  Bars3Icon
+  Bars3Icon,
+  BanknotesIcon // ✅ NEW: Import wallet icon
 } from '@heroicons/react/24/outline';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Tasks', href: '/tasks', icon: BriefcaseIcon },
+  { name: 'Wallet', href: '/wallet', icon: BanknotesIcon }, // ✅ NEW: Wallet nav item
   { name: 'Profile', href: '/profile', icon: UserIcon },
   { name: 'Messages', href: '/messages', icon: ChatBubbleLeftRightIcon },
 ];
@@ -173,7 +175,6 @@ export default function DashboardLayout() {
                   >
                     <UserIcon className="h-4 w-4 inline mr-2 text-teal-600" /> Profile
                   </button>
-                  {/* ✅ Settings REMOVED */}
                   <hr className="my-1 border-gray-200" />
                   <button
                     onClick={() => {
