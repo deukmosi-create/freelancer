@@ -19,4 +19,9 @@ urlpatterns = [
     path('check-activation/', views.check_activation),
     path('mpesa/initiate/', views.initiate_mpesa_payment),
     path('mpesa/confirmation/', views.mpesa_confirmation),  # Must be public
+
+    # =============== WALLET ENDPOINTS (NEW - ADDED BELOW) ===============
+    path('wallet/balance/', views.get_wallet_balance),
+    path('wallet/transactions/', views.get_transactions),
+    path('wallet/withdraw/', views.initiate_withdrawal),
 ]

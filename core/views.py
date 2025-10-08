@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied  # ← ADDED
+from django.db import transaction as db_transaction
+from decimal import Decimal
+from .models import Wallet, Transaction
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
@@ -274,3 +277,63 @@ def mpesa_confirmation(request):
 
         return HttpResponse("OK")
     return HttpResponse("Invalid request", status=400)
+# =============== WALLET VIEWS (NEW - ADD TO END OF FILE) ===============
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_wallet_balance(request):
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+    return Response({
+        'balance': str(wallet.balance)
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_transactions(request):
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+    transactions = wallet.transactions.all().order_by('-created_at')[:20]
+    data = [{
+        'id': t.id,
+        'type': t.transaction_type,
+        'description': t.description,
+        'amount': str(t.amount),
+        'date': t.created_at.date().isoformat()
+    } for t in transactions]
+    return Response(data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_withdrawal(request):
+    try:
+        wallet = Wallet.objects.get(user=request.user)
+    except Wallet.DoesNotExist:
+        return Response({'error': 'Wallet not found'}, status=404)
+
+    if wallet.balance < 2000:
+        return Response({'error': 'Minimum withdrawal is KES 2000'}, status=400)
+    
+    amount = request.data.get('amount')
+    if not amount:
+        amount = float(wallet.balance)
+    else:
+        amount = float(amount)
+
+    if amount > float(wallet.balance):
+        return Response({'error': 'Insufficient balance'}, status=400)
+
+    with db_transaction.atomic():
+        wallet.balance = float(wallet.balance) - amount
+        wallet.save()
+        Transaction.objects.create(
+            wallet=wallet,
+            amount=Decimal(str(amount)),
+            transaction_type='debit',
+            description='Withdrawal request'
+        )
+    
+    return Response({
+        'message': 'Withdrawal initiated',
+        'new_balance': str(wallet.balance)
+    })
